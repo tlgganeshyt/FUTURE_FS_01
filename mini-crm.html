@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LeadFlow CRM · Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0c0f;--bg2:#0f1215;--bg3:#141719;
+  --surface:#181b1f;--surface2:#1e2226;
+  --border:#252a2f;--border2:#2e3439;
+  --text:#e8eaed;--text2:#8b9199;--text3:#4a5260;
+  --green:#22c55e;--green-dim:rgba(34,197,94,.12);
+  --amber:#f59e0b;--amber-dim:rgba(245,158,11,.1);
+  --blue:#3b82f6;--blue-dim:rgba(59,130,246,.1);
+  --red:#ef4444;--red-dim:rgba(239,68,68,.1);
+  --purple:#a855f7;--purple-dim:rgba(168,85,247,.1);
+  --accent:#e8ff47;--accent-dim:rgba(232,255,71,.07);
+  --r:8px;--r2:12px;
+  --font:'Geist Mono',monospace;
+  --serif:'Instrument Serif',serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;min-height:100vh;overflow-x:hidden}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ══════════ LOGIN PAGE ══════════ */
+#login-page{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);
+  background-image:
+    radial-gradient(ellipse 60% 50% at 50% 0%,rgba(232,255,71,.04) 0%,transparent 70%),
+    repeating-linear-gradient(0deg,transparent,transparent 59px,rgba(255,255,255,.02) 60px),
+    repeating-linear-gradient(90deg,transparent,transparent 59px,rgba(255,255,255,.02) 60px);
+  position:relative;
+}
+
+.login-box{
+  width:100%;max-width:400px;padding:2.5rem;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r2);
+  box-shadow:0 40px 80px rgba(0,0,0,.6);
+  position:relative;z-index:1;
+  animation:boxIn .5s ease both;
+}
+
+@keyframes boxIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+.login-logo{
+  display:flex;align-items:center;gap:.6rem;margin-bottom:2rem;
+}
+.login-logo .logo-icon{
+  width:36px;height:36px;background:var(--accent);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;flex-shrink:0;
+}
+.login-logo .logo-text{font-family:var(--serif);font-size:1.4rem;color:var(--text)}
+.login-logo .logo-text span{color:var(--accent)}
+
+.login-box h2{font-family:var(--serif);font-size:1.6rem;font-weight:400;margin-bottom:.4rem}
+.login-box p{color:var(--text2);font-size:.75rem;margin-bottom:2rem;line-height:1.6}
+
+.form-field{margin-bottom:1.1rem}
+.form-field label{display:block;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:.45rem}
+.form-field input{
+  width:100%;padding:.75rem 1rem;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);color:var(--text);font-family:var(--font);font-size:.85rem;
+  transition:border-color .2s;outline:none;
+}
+.form-field input:focus{border-color:var(--accent)}
+
+.login-hint{
+  font-size:.7rem;color:var(--text3);margin-bottom:1.5rem;
+  padding:.6rem .8rem;background:var(--bg3);border-radius:6px;
+  border:1px solid var(--border);line-height:1.7;
+}
+
+.btn-login{
+  width:100%;padding:.85rem;
+  background:var(--accent);color:#000;
+  border:none;border-radius:var(--r);
+  font-family:var(--font);font-weight:600;font-size:.82rem;
+  letter-spacing:.06em;text-transform:uppercase;
+  cursor:pointer;transition:all .2s;
+}
+.btn-login:hover{background:#fff;box-shadow:0 8px 30px rgba(232,255,71,.25)}
+.login-err{color:var(--red);font-size:.72rem;margin-top:.6rem;display:none}
+
+/* ══════════ MAIN APP ══════════ */
+#app{display:none;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  position:fixed;top:0;left:0;bottom:0;width:220px;
+  background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:50;
+}
+
+.sidebar-logo{
+  padding:1.4rem 1.4rem 1rem;
+  display:flex;align-items:center;gap:.6rem;
+  border-bottom:1px solid var(--border);
+}
+.s-logo-icon{width:30px;height:30px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.s-logo-text{font-family:var(--serif);font-size:1.15rem}
+.s-logo-text span{color:var(--accent)}
+
+.sidebar-nav{padding:1rem .75rem;flex:1;display:flex;flex-direction:column;gap:.2rem}
+
+.nav-item{
+  display:flex;align-items:center;gap:.7rem;
+  padding:.65rem .85rem;border-radius:var(--r);
+  color:var(--text2);text-decoration:none;
+  font-size:.75rem;letter-spacing:.04em;
+  cursor:pointer;transition:all .15s;border:none;background:none;width:100%;text-align:left;
+}
+.nav-item:hover{background:var(--surface);color:var(--text)}
+.nav-item.active{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(232,255,71,.15)}
+.nav-item .ni{font-size:1rem;width:18px;text-align:center}
+.nav-item .badge{margin-left:auto;background:var(--accent);color:#000;border-radius:10px;padding:.1rem .45rem;font-size:.6rem;font-weight:700}
+
+.sidebar-footer{
+  padding:1rem 1.2rem;border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:.7rem;
+}
+.admin-avatar{width:30px;height:30px;background:var(--accent-dim);border:1px solid rgba(232,255,71,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.admin-info{flex:1}
+.admin-name{font-size:.72rem;color:var(--text)}
+.admin-role{font-size:.62rem;color:var(--text3)}
+.btn-logout{background:none;border:none;color:var(--text3);cursor:pointer;font-size:.9rem;transition:color .2s;padding:.2rem}
+.btn-logout:hover{color:var(--red)}
+
+/* ── MAIN CONTENT ── */
+.main{margin-left:220px;min-height:100vh}
+
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:rgba(10,12,15,.9);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:1rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.topbar-title{font-family:var(--serif);font-size:1.3rem;font-weight:400}
+.topbar-title span{color:var(--text2);font-size:.8rem;font-family:var(--font);margin-left:.5rem}
+
+.topbar-actions{display:flex;align-items:center;gap:.75rem}
+
+.btn{
+  display:inline-flex;align-items:center;gap:.45rem;
+  padding:.55rem 1.1rem;border-radius:var(--r);
+  font-family:var(--font);font-size:.72rem;letter-spacing:.04em;
+  cursor:pointer;transition:all .2s;border:1px solid transparent;text-decoration:none;
+}
+.btn-accent{background:var(--accent);color:#000;font-weight:600}
+.btn-accent:hover{background:#fff;box-shadow:0 4px 20px rgba(232,255,71,.2)}
+.btn-outline{background:transparent;color:var(--text2);border-color:var(--border)}
+.btn-outline:hover{border-color:var(--border2);color:var(--text)}
+.btn-danger{background:var(--red-dim);color:var(--red);border-color:rgba(239,68,68,.2)}
+.btn-danger:hover{background:rgba(239,68,68,.2)}
+
+/* ── PAGE CONTENT ── */
+.page{padding:2rem;display:none}
+.page.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ── STATS CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r2);padding:1.4rem;
+  position:relative;overflow:hidden;transition:border-color .2s;
+}
+.stat-card:hover{border-color:var(--border2)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.green::before{background:var(--green)}
+.stat-card.amber::before{background:var(--amber)}
+.stat-card.blue::before{background:var(--blue)}
+.stat-card.purple::before{background:var(--purple)}
+
+.stat-label{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:.8rem}
+.stat-value{font-family:var(--serif);font-size:2.4rem;font-weight:400;line-height:1;margin-bottom:.4rem}
+.stat-sub{font-size:.68rem;color:var(--text3)}
+.stat-icon{position:absolute;top:1.2rem;right:1.2rem;font-size:1.4rem;opacity:.35}
+
+/* ── CHART AREA ── */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:1.4rem}
+.chart-title{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:1.2rem}
+
+.bar-chart{display:flex;align-items:flex-end;gap:.5rem;height:80px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.bar{width:100%;border-radius:3px 3px 0 0;transition:height .4s ease;min-height:4px}
+.bar-lbl{font-size:.58rem;color:var(--text3)}
+
+.donut-wrap{display:flex;align-items:center;gap:1.5rem}
+.donut-legend{display:flex;flex-direction:column;gap:.5rem}
+.legend-item{display:flex;align-items:center;gap:.5rem;font-size:.7rem;color:var(--text2)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── TOOLBAR ── */
+.table-toolbar{
+  display:flex;align-items:center;gap:.75rem;margin-bottom:1.2rem;flex-wrap:wrap;
+}
+.search-box{
+  position:relative;flex:1;min-width:200px;
+}
+.search-box input{
+  width:100%;padding:.6rem .9rem .6rem 2.2rem;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);color:var(--text);font-family:var(--font);font-size:.78rem;
+  outline:none;transition:border-color .2s;
+}
+.search-box input:focus{border-color:var(--accent)}
+.search-box .si{position:absolute;left:.7rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:.85rem}
+
+.filter-select{
+  padding:.6rem .9rem;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);color:var(--text2);font-family:var(--font);font-size:.75rem;
+  outline:none;cursor:pointer;
+}
+.filter-select:focus{border-color:var(--accent)}
+
+/* ── TABLE ── */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead{background:var(--bg3)}
+th{padding:.85rem 1rem;text-align:left;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:.85rem 1rem;border-bottom:1px solid var(--border);font-size:.78rem;color:var(--text2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.015)}
+
+.lead-name{font-weight:500;color:var(--text)}
+.lead-email{font-size:.72rem;color:var(--text3)}
+.source-tag{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .6rem;border-radius:4px;font-size:.65rem;background:var(--bg3);border:1px solid var(--border);color:var(--text2)}
+
+/* STATUS BADGES */
+.status-badge{
+  display:inline-flex;align-items:center;gap:.35rem;
+  padding:.25rem .7rem;border-radius:20px;font-size:.65rem;letter-spacing:.04em;font-weight:500;
+  cursor:pointer;transition:all .2s;border:1px solid transparent;white-space:nowrap;
+}
+.status-badge:hover{filter:brightness(1.2)}
+.s-new      {background:var(--blue-dim);  color:var(--blue);  border-color:rgba(59,130,246,.2)}
+.s-contacted{background:var(--amber-dim); color:var(--amber); border-color:rgba(245,158,11,.2)}
+.s-converted{background:var(--green-dim); color:var(--green); border-color:rgba(34,197,94,.2)}
+.s-lost     {background:var(--red-dim);   color:var(--red);   border-color:rgba(239,68,68,.2)}
+
+.action-btns{display:flex;gap:.4rem}
+.icon-btn{
+  width:28px;height:28px;border:1px solid var(--border);border-radius:6px;
+  background:transparent;color:var(--text3);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;
+  transition:all .15s;
+}
+.icon-btn:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
+.icon-btn.danger:hover{background:var(--red-dim);color:var(--red);border-color:rgba(239,68,68,.3)}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;padding:1rem;
+}
+.modal-overlay.open{display:flex;animation:fadeIn .2s ease}
+
+.modal{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);
+  width:100%;max-width:540px;max-height:90vh;overflow-y:auto;
+  box-shadow:0 40px 80px rgba(0,0,0,.6);
+  animation:slideUp .25s ease;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+.modal-header{
+  padding:1.4rem 1.6rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.modal-title{font-family:var(--serif);font-size:1.2rem;font-weight:400}
+.modal-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:1.2rem;transition:color .2s;padding:.2rem}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:1.6rem}
+.modal-footer{padding:1rem 1.6rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.6rem}
+
+.field-group{margin-bottom:1.1rem}
+.field-group label{display:block;font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:.4rem}
+.field-group input,.field-group select,.field-group textarea{
+  width:100%;padding:.7rem .9rem;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);color:var(--text);font-family:var(--font);font-size:.82rem;
+  outline:none;transition:border-color .2s;
+}
+.field-group input:focus,.field-group select:focus,.field-group textarea:focus{border-color:var(--accent)}
+.field-group textarea{min-height:90px;resize:vertical;line-height:1.6}
+.field-group select option{background:var(--bg2)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+
+/* ── NOTES ── */
+.notes-list{display:flex;flex-direction:column;gap:.6rem;margin-top:1rem;max-height:200px;overflow-y:auto}
+.note-item{
+  background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  padding:.7rem .9rem;
+}
+.note-meta{font-size:.62rem;color:var(--text3);margin-bottom:.3rem}
+.note-text{font-size:.78rem;color:var(--text2);line-height:1.6}
+.no-notes{font-size:.75rem;color:var(--text3);text-align:center;padding:1rem}
+
+/* ── EMPTY STATE ── */
+.empty-state{
+  text-align:center;padding:4rem 2rem;
+  color:var(--text3);
+}
+.empty-icon{font-size:3rem;margin-bottom:1rem;opacity:.4}
+.empty-title{font-family:var(--serif);font-size:1.2rem;color:var(--text2);margin-bottom:.4rem}
+.empty-sub{font-size:.75rem;line-height:1.7}
+
+/* ── TOASTS ── */
+.toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;display:flex;flex-direction:column;gap:.5rem}
+.toast{
+  padding:.75rem 1.2rem;border-radius:var(--r);font-size:.75rem;
+  display:flex;align-items:center;gap:.6rem;min-width:220px;
+  animation:toastIn .3s ease;border:1px solid;
+  box-shadow:0 8px 30px rgba(0,0,0,.4);
+}
+.toast.success{background:var(--green-dim);color:var(--green);border-color:rgba(34,197,94,.25)}
+.toast.error  {background:var(--red-dim);  color:var(--red);  border-color:rgba(239,68,68,.25)}
+.toast.info   {background:var(--blue-dim); color:var(--blue); border-color:rgba(59,130,246,.25)}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+
+/* ── PAGINATION ── */
+.pagination{display:flex;align-items:center;gap:.4rem;margin-top:1rem;justify-content:flex-end}
+.pg-btn{
+  width:28px;height:28px;border:1px solid var(--border);border-radius:6px;
+  background:transparent;color:var(--text2);cursor:pointer;font-family:var(--font);font-size:.72rem;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.pg-btn:hover,.pg-btn.active{background:var(--accent-dim);border-color:rgba(232,255,71,.2);color:var(--accent)}
+.pg-info{font-size:.68rem;color:var(--text3);margin:0 .4rem}
+
+/* ── CONTACT FORM PAGE ── */
+.public-form-wrap{max-width:560px}
+.public-form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:2rem}
+.public-form-card h3{font-family:var(--serif);font-size:1.4rem;margin-bottom:.4rem}
+.public-form-card p{color:var(--text2);font-size:.78rem;margin-bottom:1.6rem;line-height:1.7}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .charts-row{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .proj-card.featured{grid-column:span 1;grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .stats-grid{grid-template-columns:1fr}
+  .page{padding:1rem}
+  th:nth-child(4),td:nth-child(4),
+  th:nth-child(5),td:nth-child(5){display:none}
+}
+</style>
+</head>
+<body>
+<div class="toast-container" id="toasts"></div>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="login-page">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-icon">📊</div>
+      <div class="logo-text">Lead<span>Flow</span></div>
+    </div>
+    <h2>Admin Login</h2>
+    <p>Sign in to access the CRM dashboard and manage your leads.</p>
+    <div class="login-hint">
+      Demo credentials:<br>
+      <strong>Username:</strong> admin &nbsp;|&nbsp; <strong>Password:</strong> admin123
+    </div>
+    <div class="form-field">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="admin" />
+    </div>
+    <div class="form-field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="••••••••" />
+    </div>
+    <button class="btn-login" onclick="doLogin()">Sign In →</button>
+    <div class="login-err" id="loginErr">❌ Invalid username or password.</div>
+  </div>
+</div>
+
+<!-- ══════════ APP ══════════ -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="s-logo-icon">📊</div>
+      <div class="s-logo-text">Lead<span>Flow</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="showPage('dashboard',this)"><span class="ni">🏠</span> Dashboard</button>
+      <button class="nav-item" onclick="showPage('leads',this)"><span class="ni">👥</span> All Leads <span class="badge" id="leadCount">0</span></button>
+      <button class="nav-item" onclick="showPage('add-lead',this)"><span class="ni">➕</span> Add Lead</button>
+      <button class="nav-item" onclick="showPage('contact-form',this)"><span class="ni">📬</span> Contact Form</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="admin-avatar">👤</div>
+      <div class="admin-info">
+        <div class="admin-name">Admin</div>
+        <div class="admin-role">CRM Manager</div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()" title="Logout">⏏</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="pageTitle">Dashboard <span id="pageDate"></span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline" onclick="showPage('add-lead',null)">+ Add Lead</button>
+        <button class="btn btn-accent" onclick="openModal('addModal')">Quick Add</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD PAGE -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-icon">🌊</div>
+          <div class="stat-label">Total Leads</div>
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-sub">All time</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-icon">📞</div>
+          <div class="stat-label">Contacted</div>
+          <div class="stat-value" id="stat-contacted">0</div>
+          <div class="stat-sub">Awaiting conversion</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon">✅</div>
+          <div class="stat-label">Converted</div>
+          <div class="stat-value" id="stat-converted">0</div>
+          <div class="stat-sub" id="stat-conv-rate">0% rate</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-icon">🆕</div>
+          <div class="stat-label">New Today</div>
+          <div class="stat-value" id="stat-new">0</div>
+          <div class="stat-sub">Needs follow-up</div>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">Leads by Source</div>
+          <div id="bar-chart" class="bar-chart"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Status Breakdown</div>
+          <div class="donut-wrap">
+            <canvas id="donut-canvas" width="110" height="110"></canvas>
+            <div class="donut-legend" id="donut-legend"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-title" style="margin-bottom:.8rem">Recent Leads</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th><th>Email</th><th>Source</th><th>Status</th><th>Date</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="recent-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ALL LEADS PAGE -->
+    <div class="page" id="page-leads">
+      <div class="table-toolbar">
+        <div class="search-box">
+          <span class="si">🔍</span>
+          <input type="text" placeholder="Search leads…" oninput="filterLeads()" id="searchInput"/>
+        </div>
+        <select class="filter-select" onchange="filterLeads()" id="statusFilter">
+          <option value="">All Statuses</option>
+          <option value="new">New</option>
+          <option value="contacted">Contacted</option>
+          <option value="converted">Converted</option>
+          <option value="lost">Lost</option>
+        </select>
+        <select class="filter-select" onchange="filterLeads()" id="sourceFilter">
+          <option value="">All Sources</option>
+          <option value="Website">Website</option>
+          <option value="LinkedIn">LinkedIn</option>
+          <option value="Referral">Referral</option>
+          <option value="Email">Email</option>
+          <option value="Other">Other</option>
+        </select>
+        <button class="btn btn-accent" onclick="openModal('addModal')">+ Add Lead</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Name / Email</th><th>Phone</th><th>Source</th><th>Status</th><th>Date</th><th>Notes</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="leads-tbody"></tbody>
+        </table>
+      </div>
+      <div id="empty-leads" class="empty-state" style="display:none">
+        <div class="empty-icon">📭</div>
+        <div class="empty-title">No leads found</div>
+        <div class="empty-sub">Try adjusting your filters or add a new lead.</div>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+
+    <!-- ADD LEAD PAGE -->
+    <div class="page" id="page-add-lead">
+      <div style="max-width:600px">
+        <div class="chart-card">
+          <div class="chart-title" style="margin-bottom:1.4rem">New Lead Details</div>
+          <div class="form-row">
+            <div class="field-group"><label>First Name *</label><input type="text" id="al-fname" placeholder="John"/></div>
+            <div class="field-group"><label>Last Name *</label><input type="text" id="al-lname" placeholder="Doe"/></div>
+          </div>
+          <div class="field-group"><label>Email *</label><input type="email" id="al-email" placeholder="john@example.com"/></div>
+          <div class="form-row">
+            <div class="field-group"><label>Phone</label><input type="tel" id="al-phone" placeholder="+1 234 567 8900"/></div>
+            <div class="field-group"><label>Company</label><input type="text" id="al-company" placeholder="Acme Inc."/></div>
+          </div>
+          <div class="form-row">
+            <div class="field-group"><label>Source</label>
+              <select id="al-source">
+                <option>Website</option><option>LinkedIn</option><option>Referral</option><option>Email</option><option>Other</option>
+              </select>
+            </div>
+            <div class="field-group"><label>Status</label>
+              <select id="al-status">
+                <option value="new">New</option><option value="contacted">Contacted</option><option value="converted">Converted</option><option value="lost">Lost</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-group"><label>Initial Note</label><textarea id="al-note" placeholder="Add a note about this lead…"></textarea></div>
+          <div style="display:flex;gap:.6rem">
+            <button class="btn btn-accent" onclick="submitAddLead()">Save Lead →</button>
+            <button class="btn btn-outline" onclick="showPage('leads',null)">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTACT FORM PAGE -->
+    <div class="page" id="page-contact-form">
+      <div class="public-form-wrap">
+        <div class="public-form-card">
+          <h3>📬 Website Contact Form</h3>
+          <p>This is the public-facing form your website visitors fill in. Submissions are automatically saved as new leads in the CRM.</p>
+          <div class="form-row">
+            <div class="field-group"><label>First Name *</label><input type="text" id="cf-fname" placeholder="Your first name"/></div>
+            <div class="field-group"><label>Last Name *</label><input type="text" id="cf-lname" placeholder="Your last name"/></div>
+          </div>
+          <div class="field-group"><label>Email *</label><input type="email" id="cf-email" placeholder="you@example.com"/></div>
+          <div class="field-group"><label>Phone</label><input type="tel" id="cf-phone" placeholder="+1 234 567 8900"/></div>
+          <div class="field-group"><label>Company</label><input type="text" id="cf-company" placeholder="Your company name"/></div>
+          <div class="field-group"><label>Message</label><textarea id="cf-message" placeholder="Tell us about your project…"></textarea></div>
+          <button class="btn btn-accent" style="width:100%" onclick="submitContactForm()">Send Message →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ QUICK ADD MODAL ══════ -->
+<div class="modal-overlay" id="addModal" onclick="closeModalOutside(event,'addModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add New Lead</div>
+      <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="field-group"><label>First Name *</label><input type="text" id="m-fname" placeholder="John"/></div>
+        <div class="field-group"><label>Last Name *</label><input type="text" id="m-lname" placeholder="Doe"/></div>
+      </div>
+      <div class="field-group"><label>Email *</label><input type="email" id="m-email" placeholder="john@example.com"/></div>
+      <div class="form-row">
+        <div class="field-group"><label>Phone</label><input type="tel" id="m-phone" placeholder="+1 234 567"/></div>
+        <div class="field-group"><label>Company</label><input type="text" id="m-company" placeholder="Acme Inc."/></div>
+      </div>
+      <div class="form-row">
+        <div class="field-group"><label>Source</label>
+          <select id="m-source"><option>Website</option><option>LinkedIn</option><option>Referral</option><option>Email</option><option>Other</option></select>
+        </div>
+        <div class="field-group"><label>Status</label>
+          <select id="m-status"><option value="new">New</option><option value="contacted">Contacted</option><option value="converted">Converted</option><option value="lost">Lost</option></select>
+        </div>
+      </div>
+      <div class="field-group"><label>Note</label><textarea id="m-note" placeholder="Initial note…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addModal')">Cancel</button>
+      <button class="btn btn-accent" onclick="saveLeadFromModal()">Save Lead →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ VIEW/EDIT LEAD MODAL ══════ -->
+<div class="modal-overlay" id="viewModal" onclick="closeModalOutside(event,'viewModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="vm-title">Lead Details</div>
+      <button class="modal-close" onclick="closeModal('viewModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="field-group"><label>First Name</label><input type="text" id="vm-fname"/></div>
+        <div class="field-group"><label>Last Name</label><input type="text" id="vm-lname"/></div>
+      </div>
+      <div class="field-group"><label>Email</label><input type="email" id="vm-email"/></div>
+      <div class="form-row">
+        <div class="field-group"><label>Phone</label><input type="tel" id="vm-phone"/></div>
+        <div class="field-group"><label>Company</label><input type="text" id="vm-company"/></div>
+      </div>
+      <div class="form-row">
+        <div class="field-group"><label>Source</label>
+          <select id="vm-source"><option>Website</option><option>LinkedIn</option><option>Referral</option><option>Email</option><option>Other</option></select>
+        </div>
+        <div class="field-group"><label>Status</label>
+          <select id="vm-status"><option value="new">New</option><option value="contacted">Contacted</option><option value="converted">Converted</option><option value="lost">Lost</option></select>
+        </div>
+      </div>
+      <hr style="border-color:var(--border);margin:1rem 0"/>
+      <div class="chart-title">Follow-up Notes</div>
+      <div class="notes-list" id="vm-notes-list"></div>
+      <div class="field-group" style="margin-top:.8rem">
+        <label>Add Note</label>
+        <textarea id="vm-new-note" placeholder="Write a follow-up note…" style="min-height:70px"></textarea>
+      </div>
+      <button class="btn btn-outline" style="font-size:.7rem" onclick="addNoteToLead()">+ Save Note</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="deleteLead()">Delete</button>
+      <button class="btn btn-outline" onclick="closeModal('viewModal')">Cancel</button>
+      <button class="btn btn-accent" onclick="saveLeadEdits()">Save Changes →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════ STATE ══════════
+const ADMIN = {user:'admin', pass:'admin123'};
+let leads = JSON.parse(localStorage.getItem('crm_leads') || '[]');
+let currentLeadId = null;
+let currentPage = 1;
+const PER_PAGE = 8;
+
+// seed demo data if empty
+if(leads.length === 0){
+  const demos = [
+    {id:uid(),fname:'Priya',lname:'Sharma',email:'priya@techcorp.in',phone:'+91 98765 43210',company:'TechCorp',source:'LinkedIn',status:'contacted',notes:[{text:'Reached out via LinkedIn. Interested in web app.',ts:new Date().toISOString()}],date:new Date().toISOString()},
+    {id:uid(),fname:'Rahul',lname:'Verma',email:'rahul@startup.io',phone:'+91 87654 32100',company:'StartupIO',source:'Website',status:'new',notes:[],date:new Date().toISOString()},
+    {id:uid(),fname:'Sneha',lname:'Patel',email:'sneha@design.co',phone:'+91 76543 21000',company:'Design Co',source:'Referral',status:'converted',notes:[{text:'Signed contract for 3-month project.',ts:new Date().toISOString()}],date:new Date().toISOString()},
+    {id:uid(),fname:'Arjun',lname:'Nair',email:'arjun@ecomm.net',phone:'+91 65432 10000',company:'EcommNet',source:'Email',status:'new',notes:[],date:new Date().toISOString()},
+    {id:uid(),fname:'Kavya',lname:'Reddy',email:'kavya@media.in',phone:'+91 54321 00000',company:'Media IN',source:'Website',status:'contacted',notes:[{text:'Sent proposal. Waiting for reply.',ts:new Date().toISOString()}],date:new Date().toISOString()},
+    {id:uid(),fname:'Mohammed',lname:'Khan',email:'m.khan@agency.com',phone:'+91 44321 00001',company:'Agency',source:'LinkedIn',status:'lost',notes:[{text:'Budget constraints. Follow up Q3.',ts:new Date().toISOString()}],date:new Date().toISOString()},
+  ];
+  leads = demos;
+  saveLeads();
+}
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2); }
+function saveLeads(){ localStorage.setItem('crm_leads',JSON.stringify(leads)); updateBadge(); }
+function updateBadge(){ document.getElementById('leadCount').textContent=leads.length; }
+
+// ══════════ AUTH ══════════
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  if(u===ADMIN.user && p===ADMIN.pass){
+    document.getElementById('login-page').style.display='none';
+    document.getElementById('app').style.display='flex';
+    document.getElementById('pageDate').textContent = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    refreshDashboard(); updateBadge();
+    toast('Welcome back, Admin! 👋','success');
+  } else {
+    document.getElementById('loginErr').style.display='block';
+  }
+}
+
+document.addEventListener('keydown',e=>{ if(e.key==='Enter' && document.getElementById('login-page').style.display!=='none') doLogin(); });
+
+function doLogout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-page').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginErr').style.display='none';
+}
+
+// ══════════ NAVIGATION ══════════
+function showPage(id, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const titles={dashboard:'Dashboard',leads:'All Leads',['add-lead']:'Add Lead',['contact-form']:'Contact Form'};
+  document.getElementById('pageTitle').innerHTML = titles[id] + ' <span>'+new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+'</span>';
+  if(id==='dashboard') refreshDashboard();
+  if(id==='leads'){ currentPage=1; renderLeads(); }
+}
+
+// ══════════ DASHBOARD ══════════
+function refreshDashboard(){
+  const total=leads.length;
+  const contacted=leads.filter(l=>l.status==='contacted').length;
+  const converted=leads.filter(l=>l.status==='converted').length;
+  const today=new Date().toDateString();
+  const newToday=leads.filter(l=>new Date(l.date).toDateString()===today).length;
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-contacted').textContent=contacted;
+  document.getElementById('stat-converted').textContent=converted;
+  document.getElementById('stat-conv-rate').textContent=total?Math.round(converted/total*100)+'% rate':'0% rate';
+  document.getElementById('stat-new').textContent=newToday;
+  renderBarChart(); renderDonut();
+  // recent
+  const recent=[...leads].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+  const tb=document.getElementById('recent-tbody');
+  tb.innerHTML=recent.map(l=>`
+    <tr>
+      <td><div class="lead-name">${l.fname} ${l.lname}</div><div class="lead-email">${l.email}</div></td>
+      <td><span class="source-tag">${l.source}</span></td>
+      <td>${statusBadge(l)}</td>
+      <td>${fmtDate(l.date)}</td>
+      <td><div class="action-btns">
+        <button class="icon-btn" onclick="openViewModal('${l.id}')" title="Edit">✏️</button>
+        <button class="icon-btn" onclick="cycleStatus('${l.id}')" title="Next Status">🔄</button>
+      </div></td>
+    </tr>`).join('');
+  if(!recent.length) tb.innerHTML=`<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:2rem">No leads yet.</td></tr>`;
+}
+
+function renderBarChart(){
+  const sources=['Website','LinkedIn','Referral','Email','Other'];
+  const counts=sources.map(s=>leads.filter(l=>l.source===s).length);
+  const max=Math.max(...counts,1);
+  const colors=['var(--blue)','var(--purple)','var(--green)','var(--amber)','var(--red)'];
+  document.getElementById('bar-chart').innerHTML=sources.map((s,i)=>`
+    <div class="bar-col">
+      <div class="bar" style="height:${Math.round(counts[i]/max*72)+4}px;background:${colors[i]};opacity:${counts[i]?1:.2}"></div>
+      <div class="bar-lbl">${s.slice(0,4)}</div>
+    </div>`).join('');
+}
+
+function renderDonut(){
+  const statuses=['new','contacted','converted','lost'];
+  const labels=['New','Contacted','Converted','Lost'];
+  const colors=['#3b82f6','#f59e0b','#22c55e','#ef4444'];
+  const counts=statuses.map(s=>leads.filter(l=>l.status===s).length);
+  const total=counts.reduce((a,b)=>a+b,0)||1;
+  const cv=document.getElementById('donut-canvas');
+  const ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,110,110);
+  let start=-Math.PI/2;
+  counts.forEach((c,i)=>{
+    const slice=c/total*Math.PI*2;
+    ctx.beginPath(); ctx.moveTo(55,55);
+    ctx.arc(55,55,50,start,start+slice);
+    ctx.closePath(); ctx.fillStyle=colors[i]; ctx.fill();
+    start+=slice;
+  });
+  ctx.beginPath(); ctx.arc(55,55,30,0,Math.PI*2); ctx.fillStyle='var(--surface)'; ctx.fill();
+  ctx.fillStyle='var(--text)'; ctx.font='bold 14px Geist Mono,monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(leads.length,55,55);
+  const lg=document.getElementById('donut-legend');
+  lg.innerHTML=statuses.map((s,i)=>`
+    <div class="legend-item"><div class="legend-dot" style="background:${colors[i]}"></div>${labels[i]}: <strong>${counts[i]}</strong></div>`).join('');
+}
+
+// ══════════ LEADS TABLE ══════════
+function filterLeads(){ currentPage=1; renderLeads(); }
+
+function renderLeads(){
+  const q=(document.getElementById('searchInput')?.value||'').toLowerCase();
+  const sf=document.getElementById('statusFilter')?.value||'';
+  const src=document.getElementById('sourceFilter')?.value||'';
+  let filtered=leads.filter(l=>{
+    const match=!q||(l.fname+' '+l.lname+' '+l.email+' '+l.company).toLowerCase().includes(q);
+    const sm=!sf||l.status===sf;
+    const srcm=!src||l.source===src;
+    return match&&sm&&srcm;
+  }).sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  const total=filtered.length;
+  const pages=Math.ceil(total/PER_PAGE)||1;
+  const slice=filtered.slice((currentPage-1)*PER_PAGE,currentPage*PER_PAGE);
+
+  document.getElementById('empty-leads').style.display=total?'none':'block';
+  const tb=document.getElementById('leads-tbody');
+  tb.innerHTML=slice.map((l,i)=>`
+    <tr>
+      <td style="color:var(--text3)">${(currentPage-1)*PER_PAGE+i+1}</td>
+      <td><div class="lead-name">${l.fname} ${l.lname}</div><div class="lead-email">${l.email}</div></td>
+      <td>${l.phone||'—'}</td>
+      <td><span class="source-tag">${l.source}</span></td>
+      <td>${statusBadge(l,true)}</td>
+      <td>${fmtDate(l.date)}</td>
+      <td><span style="color:var(--text3)">${l.notes.length} note${l.notes.length!==1?'s':''}</span></td>
+      <td><div class="action-btns">
+        <button class="icon-btn" onclick="openViewModal('${l.id}')" title="View/Edit">✏️</button>
+        <button class="icon-btn" onclick="cycleStatus('${l.id}')" title="Next Status">🔄</button>
+        <button class="icon-btn danger" onclick="deleteLeadById('${l.id}')" title="Delete">🗑️</button>
+      </div></td>
+    </tr>`).join('');
+
+  // pagination
+  const pg=document.getElementById('pagination');
+  if(pages<=1){pg.innerHTML='';return;}
+  let html=`<span class="pg-info">Page ${currentPage} of ${pages}</span>`;
+  for(let p=1;p<=pages;p++) html+=`<button class="pg-btn${p===currentPage?' active':''}" onclick="goPage(${p})">${p}</button>`;
+  pg.innerHTML=html;
+}
+
+function goPage(p){ currentPage=p; renderLeads(); }
+
+function statusBadge(l, clickable=false){
+  const map={new:'🔵 New',contacted:'🟡 Contacted',converted:'🟢 Converted',lost:'🔴 Lost'};
+  const cls={new:'s-new',contacted:'s-contacted',converted:'s-converted',lost:'s-lost'};
+  const click=clickable?`onclick="cycleStatus('${l.id}')"`:''
+  return `<span class="status-badge ${cls[l.status]||'s-new'}" ${click}>${map[l.status]||l.status}</span>`;
+}
+
+function cycleStatus(id){
+  const order=['new','contacted','converted','lost'];
+  const l=leads.find(x=>x.id===id);
+  if(!l)return;
+  l.status=order[(order.indexOf(l.status)+1)%order.length];
+  saveLeads(); renderLeads(); refreshDashboard();
+  toast(`Status updated to "${l.status}"`, 'info');
+}
+
+function fmtDate(d){ return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+
+// ══════════ ADD LEAD ══════════
+function buildLead(f,l,e,ph,co,so,st,nt){
+  if(!f||!l||!e){toast('Name and email are required','error');return null;}
+  return {id:uid(),fname:f,lname:l,email:e,phone:ph,company:co,source:so,status:st,notes:nt?[{text:nt,ts:new Date().toISOString()}]:[],date:new Date().toISOString()};
+}
+
+function submitAddLead(){
+  const lead=buildLead(
+    document.getElementById('al-fname').value.trim(),
+    document.getElementById('al-lname').value.trim(),
+    document.getElementById('al-email').value.trim(),
+    document.getElementById('al-phone').value.trim(),
+    document.getElementById('al-company').value.trim(),
+    document.getElementById('al-source').value,
+    document.getElementById('al-status').value,
+    document.getElementById('al-note').value.trim()
+  );
+  if(!lead)return;
+  leads.unshift(lead); saveLeads();
+  ['al-fname','al-lname','al-email','al-phone','al-company','al-note'].forEach(id=>document.getElementById(id).value='');
+  toast('Lead added successfully! ✅','success');
+  showPage('leads',null);
+}
+
+function saveLeadFromModal(){
+  const lead=buildLead(
+    document.getElementById('m-fname').value.trim(),
+    document.getElementById('m-lname').value.trim(),
+    document.getElementById('m-email').value.trim(),
+    document.getElementById('m-phone').value.trim(),
+    document.getElementById('m-company').value.trim(),
+    document.getElementById('m-source').value,
+    document.getElementById('m-status').value,
+    document.getElementById('m-note').value.trim()
+  );
+  if(!lead)return;
+  leads.unshift(lead); saveLeads();
+  closeModal('addModal');
+  ['m-fname','m-lname','m-email','m-phone','m-company','m-note'].forEach(id=>document.getElementById(id).value='');
+  toast('Lead added! ✅','success');
+  refreshDashboard(); renderLeads();
+}
+
+// ══════════ VIEW/EDIT MODAL ══════════
+function openViewModal(id){
+  const l=leads.find(x=>x.id===id);
+  if(!l)return;
+  currentLeadId=id;
+  document.getElementById('vm-title').textContent=`${l.fname} ${l.lname}`;
+  document.getElementById('vm-fname').value=l.fname;
+  document.getElementById('vm-lname').value=l.lname;
+  document.getElementById('vm-email').value=l.email;
+  document.getElementById('vm-phone').value=l.phone||'';
+  document.getElementById('vm-company').value=l.company||'';
+  document.getElementById('vm-source').value=l.source;
+  document.getElementById('vm-status').value=l.status;
+  renderNotes(l);
+  openModal('viewModal');
+}
+
+function renderNotes(l){
+  const nl=document.getElementById('vm-notes-list');
+  if(!l.notes.length){nl.innerHTML='<div class="no-notes">No notes yet.</div>';return;}
+  nl.innerHTML=[...l.notes].reverse().map(n=>`
+    <div class="note-item">
+      <div class="note-meta">${fmtDate(n.ts)}</div>
+      <div class="note-text">${n.text}</div>
+    </div>`).join('');
+}
+
+function addNoteToLead(){
+  const text=document.getElementById('vm-new-note').value.trim();
+  if(!text)return;
+  const l=leads.find(x=>x.id===currentLeadId);
+  if(!l)return;
+  l.notes.push({text,ts:new Date().toISOString()});
+  document.getElementById('vm-new-note').value='';
+  saveLeads(); renderNotes(l);
+  toast('Note saved ✅','success');
+}
+
+function saveLeadEdits(){
+  const l=leads.find(x=>x.id===currentLeadId);
+  if(!l)return;
+  l.fname=document.getElementById('vm-fname').value.trim()||l.fname;
+  l.lname=document.getElementById('vm-lname').value.trim()||l.lname;
+  l.email=document.getElementById('vm-email').value.trim()||l.email;
+  l.phone=document.getElementById('vm-phone').value.trim();
+  l.company=document.getElementById('vm-company').value.trim();
+  l.source=document.getElementById('vm-source').value;
+  l.status=document.getElementById('vm-status').value;
+  saveLeads(); closeModal('viewModal');
+  toast('Lead updated ✅','success');
+  refreshDashboard(); renderLeads();
+}
+
+function deleteLead(){ deleteLeadById(currentLeadId); closeModal('viewModal'); }
+function deleteLeadById(id){
+  if(!confirm('Delete this lead?'))return;
+  leads=leads.filter(l=>l.id!==id);
+  saveLeads(); refreshDashboard(); renderLeads();
+  toast('Lead deleted','error');
+}
+
+// ══════════ CONTACT FORM ══════════
+function submitContactForm(){
+  const f=document.getElementById('cf-fname').value.trim();
+  const l=document.getElementById('cf-lname').value.trim();
+  const e=document.getElementById('cf-email').value.trim();
+  if(!f||!l||!e){toast('Name and email are required','error');return;}
+  const lead={
+    id:uid(),fname:f,lname:l,email:e,
+    phone:document.getElementById('cf-phone').value.trim(),
+    company:document.getElementById('cf-company').value.trim(),
+    source:'Website',status:'new',
+    notes:document.getElementById('cf-message').value.trim()?[{text:document.getElementById('cf-message').value.trim(),ts:new Date().toISOString()}]:[],
+    date:new Date().toISOString()
+  };
+  leads.unshift(lead); saveLeads();
+  ['cf-fname','cf-lname','cf-email','cf-phone','cf-company','cf-message'].forEach(id=>document.getElementById(id).value='');
+  toast('Message sent! Lead created in CRM ✅','success');
+  refreshDashboard();
+}
+
+// ══════════ MODALS ══════════
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function closeModalOutside(e,id){ if(e.target.id===id) closeModal(id); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){['addModal','viewModal'].forEach(closeModal);} });
+
+// ══════════ TOASTS ══════════
+function toast(msg,type='info'){
+  const el=document.createElement('div');
+  el.className=`toast ${type}`;
+  el.textContent=msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(),3200);
+}
+
+// ══════════ INIT ══════════
+updateBadge();
+document.getElementById('pageDate').textContent=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+</script>
+</body>
+</html>
